@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserve Parking - Smart Parking System</title>
+</head>
+<body>
+    <h2>Reserve Parking</h2>
+    <form id="reservationForm">
+        <label for="parkingSpot">Select Parking Spot:</label>
+        <select id="parkingSpot" required></select>
+        
+        <label for="reservationDate">Date:</label>
+        <input type="date" id="reservationDate" required>
+        
+        <label for="reservationTime">Time Slot:</label>
+        <input type="time" id="reservationTime" required>
+        
+        <button type="submit">Reserve</button>
+    </form>
+    <script src="reservation.js"></script>
+</body>
+</html>
