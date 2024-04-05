@@ -1,10 +1,44 @@
 from fastapi import FastAPI, HTTPException, Body
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List
+<<<<<<< Updated upstream
 from gRPC_client import fetch_dynamic_pricing
+=======
+from typing import Dict
+from fastapi.middleware.cors import CORSMiddleware
+>>>>>>> Stashed changes
 
 
 app = FastAPI(title="Parking Lot Management System")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust the port if your front-end runs on a different one
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+def read_root():
+    return FileResponse('public/index.html')
+
+@app.get("/login")
+def read_root():
+    return FileResponse('public/login.html')
+
+@app.get("/register")
+def read_root():
+    return FileResponse('public/register.html')
+
+@app.get("/find_parking")
+def read_root():
+    return FileResponse('public/find_parking.html')
+
+@app.get("/reservation")
+def read_root():
+    return FileResponse('public/reservation.html')
 
 # In-memory data storage
 sensors_data = {}  # Format: {lot_id: {spot_id: bool}}
@@ -16,7 +50,11 @@ pricing_history = []  # History of pricing updates
 # Revised Pydantic models for request and response data
 class LotSensorData(BaseModel):
     lot_id: int
+<<<<<<< Updated upstream
     sensors: List[int]  # List of 0s and 1s representing each spot in the lot
+=======
+    sensors: Dict[int, bool]
+>>>>>>> Stashed changes
 
 class Reservation(BaseModel):
     lot_id: int
@@ -30,6 +68,8 @@ class User(BaseModel):
     user_id: str
     username: str
     email: str
+
+
 
 # IoT Sensors endpoints
 @app.post("/sensors/data")
