@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package dynamicpricing;
+
+// Define a service
+service DynamicPricingService {
+  rpc GetDynamicPricing (PricingRequest) returns (PricingResponse) {}
+  rpc GetHistoricalPricing (HistoricalPricingRequest) returns (HistoricalPricingResponse) {}
+}
+
+// Define request and response messages
+message PricingRequest {
+  string demand_factor = 1;
+}
+
+message PricingResponse {
+  double price = 1;
+}
+
+message HistoricalPricingRequest {}
+
+message HistoricalPricingResponse {
+  repeated double historical_prices = 1;
+}

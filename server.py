@@ -1,8 +1,7 @@
 from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel
 from typing import List
-from typing import Dict
-
+from gRPC_client import fetch_dynamic_pricing
 
 
 app = FastAPI(title="Parking Lot Management System")
@@ -17,8 +16,7 @@ pricing_history = []  # History of pricing updates
 # Revised Pydantic models for request and response data
 class LotSensorData(BaseModel):
     lot_id: int
-    sensors: Dict[int, bool]
-
+    sensors: List[int]  # List of 0s and 1s representing each spot in the lot
 
 class Reservation(BaseModel):
     lot_id: int
@@ -40,9 +38,8 @@ async def receive_sensors_data(data: List[LotSensorData]):
         lot_id = lot_data.lot_id
         if lot_id not in sensors_data:
             sensors_data[lot_id] = {}
-        for spot_id, status in lot_data.sensors.items():
-            sensors_data[lot_id][spot_id] = status
-    # return sensors_data # uncomment this line to see the data in all parking lots 
+        for spot_id, status in enumerate(lot_data.sensors):
+            sensors_data[lot_id][spot_id] = bool(status)
     return {"message": "Data received successfully", "data": data}
 
 # User Interface for Drivers endpoints
@@ -66,6 +63,12 @@ async def create_reservation(reservation: Reservation):
     return {"message": "Reservation created successfully", "reservation": reservation, "total_cost": total_cost}
 
 # Pricing Endpoints
+
+@app.get("/dynamic-pricing")
+async def dynamic_pricing(demand_factor: str):
+    price = fetch_dynamic_pricing(demand_factor)
+    return {"price": price}
+
 @app.get("/pricing/current")
 async def get_current_pricing():
     return {"pricing": current_pricing}
