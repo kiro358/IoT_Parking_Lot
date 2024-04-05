@@ -1,41 +1,11 @@
 from fastapi import FastAPI, HTTPException, Body
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List
 from gRPC_client import fetch_dynamic_pricing
-from typing import Dict
-from fastapi.middleware.cors import CORSMiddleware
+from pricing_service import calculate_dynamic_pricing
 
 
 app = FastAPI(title="Parking Lot Management System")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Adjust the port if your front-end runs on a different one
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
-def read_root():
-    return FileResponse('public/index.html')
-
-@app.get("/login")
-def read_root():
-    return FileResponse('public/login.html')
-
-@app.get("/register")
-def read_root():
-    return FileResponse('public/register.html')
-
-@app.get("/find_parking")
-def read_root():
-    return FileResponse('public/find_parking.html')
-
-@app.get("/reservation")
-def read_root():
-    return FileResponse('public/reservation.html')
 
 # In-memory data storage
 sensors_data = {}  # Format: {lot_id: {spot_id: bool}}
@@ -47,7 +17,7 @@ pricing_history = []  # History of pricing updates
 # Revised Pydantic models for request and response data
 class LotSensorData(BaseModel):
     lot_id: int
-    sensors: Dict[int, bool]
+    sensors: List[int]  # List of 0s and 1s representing each spot in the lot
 
 class Reservation(BaseModel):
     lot_id: int
@@ -61,8 +31,6 @@ class User(BaseModel):
     user_id: str
     username: str
     email: str
-
-
 
 # IoT Sensors endpoints
 @app.post("/sensors/data")
@@ -98,8 +66,13 @@ async def create_reservation(reservation: Reservation):
 # Pricing Endpoints
 
 @app.get("/dynamic-pricing")
-async def dynamic_pricing(demand_factor: str):
-    price = fetch_dynamic_pricing(demand_factor)
+async def dynamic_pricing(demand_factor: str, current_time: str):
+    # Using the gRPC client to fetch pricing
+    grpc_price = fetch_dynamic_pricing(demand_factor)
+    
+    # Optionally using the local calculate_dynamic_pricing function for additional calculations
+    price = calculate_dynamic_pricing(demand_factor, current_time, grpc_price)
+    
     return {"price": price}
 
 @app.get("/pricing/current")

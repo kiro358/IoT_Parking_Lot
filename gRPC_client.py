@@ -7,3 +7,4 @@ def fetch_dynamic_pricing(demand_factor):
         stub = dynamic_pricing_pb2_grpc.DynamicPricingServiceStub(channel)
         response = stub.GetDynamicPricing(dynamic_pricing_pb2.PricingRequest(demand_factor=demand_factor))
         return response.price
+
