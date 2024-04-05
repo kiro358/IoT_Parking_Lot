@@ -2,12 +2,9 @@ from fastapi import FastAPI, HTTPException, Body
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List
-<<<<<<< Updated upstream
 from gRPC_client import fetch_dynamic_pricing
-=======
 from typing import Dict
 from fastapi.middleware.cors import CORSMiddleware
->>>>>>> Stashed changes
 
 
 app = FastAPI(title="Parking Lot Management System")
@@ -50,11 +47,7 @@ pricing_history = []  # History of pricing updates
 # Revised Pydantic models for request and response data
 class LotSensorData(BaseModel):
     lot_id: int
-<<<<<<< Updated upstream
-    sensors: List[int]  # List of 0s and 1s representing each spot in the lot
-=======
     sensors: Dict[int, bool]
->>>>>>> Stashed changes
 
 class Reservation(BaseModel):
     lot_id: int
