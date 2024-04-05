@@ -1,6 +1,9 @@
 from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel
 from typing import List
+from typing import Dict
+
+
 
 app = FastAPI(title="Parking Lot Management System")
 
@@ -14,7 +17,8 @@ pricing_history = []  # History of pricing updates
 # Revised Pydantic models for request and response data
 class LotSensorData(BaseModel):
     lot_id: int
-    sensors: List[int]  # List of 0s and 1s representing each spot in the lot
+    sensors: Dict[int, bool]
+
 
 class Reservation(BaseModel):
     lot_id: int
@@ -36,8 +40,9 @@ async def receive_sensors_data(data: List[LotSensorData]):
         lot_id = lot_data.lot_id
         if lot_id not in sensors_data:
             sensors_data[lot_id] = {}
-        for spot_id, status in enumerate(lot_data.sensors):
-            sensors_data[lot_id][spot_id] = bool(status)
+        for spot_id, status in lot_data.sensors.items():
+            sensors_data[lot_id][spot_id] = status
+    # return sensors_data # uncomment this line to see the data in all parking lots 
     return {"message": "Data received successfully", "data": data}
 
 # User Interface for Drivers endpoints
