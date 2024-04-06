@@ -4,7 +4,9 @@ from typing import List
 from gRPC_client import fetch_dynamic_pricing
 from pricing_service import calculate_dynamic_pricing 
 from fastapi.responses import FileResponse
-
+import time
+from datetime import datetime, timedelta
+import asyncio
 
 app = FastAPI(title="Parking Lot Management System")
 
@@ -36,6 +38,7 @@ class Reservation(BaseModel):
     current_pricing: int
     duration: int
     reservation_id: str
+    start_time: datetime = datetime.now()
 
 class User(BaseModel):
     user_id: str
@@ -88,9 +91,13 @@ async def create_reservation(reservation: Reservation):
     spot_id = reservation.spot_id
     if lot_id in sensors_data and sensors_data[lot_id].get(spot_id):
         raise HTTPException(status_code=400, detail="Spot is already occupied")
+    # Store reservation data
+    reservation_data = reservation.dict()
+    reservation_data["start_time"] = time.time()  
+    reservations_data.append(reservation_data)
+
     sensors_data[lot_id][spot_id] = True
     total_cost = reservation.current_pricing * reservation.duration
-    reservation_data = reservation.dict()
     reservation_data["total_cost"] = total_cost
     reservations_data.append(reservation_data)
     return {"message": "Reservation created successfully", "reservation": reservation, "total_cost": total_cost}
@@ -160,3 +167,26 @@ async def system_status():
 @app.post("/feedback")
 async def submit_feedback(feedback: str = Body(...)):
     return {"message": "Feedback received", "feedback": feedback}
+
+async def release_expired_reservations():
+    while True:
+        # Check reservations periodically
+        current_time = time.time()
+
+        for reservation in reservations_data:
+            start_time = reservation.get("start_time", 0)
+            duration = reservation.get("duration", 0)
+            if current_time >= start_time + duration * 3600:  
+                lot_id = reservation["lot_id"]
+                spot_id = reservation["spot_id"]
+                sensors_data[lot_id][spot_id] = False  
+
+
+        # Sleep for a period before checking again (e.g., every hour)
+        await asyncio.sleep(3600)  # Sleep for 1 hour (3600 seconds)
+
+# Start the background task
+async def start_background_tasks():
+    asyncio.create_task(release_expired_reservations())
+
+app.add_event_handler("startup", start_background_tasks)

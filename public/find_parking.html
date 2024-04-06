@@ -4,10 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Parking - Smart Parking System</title>
+    <style>
+        .parking-box {
+            width: 80%;
+            max-width: 800px; /* Set a maximum width to maintain responsiveness */
+            margin: 20px auto;
+            border: 2px solid #000;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .parking-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px; /* Adjust margin between rows */
+        }
+
+        .parking-spot {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #000;
+            line-height: 60px;
+            font-size: 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .parking-spot.unavailable {
+            background-color: gray;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
     <h2>Find Parking</h2>
-    <!-- Interactive map integration will go here -->
-    <!-- A script will be added to fetch parking spots from the backend and display them -->
+    <label for="floor">Select Floor:</label>
+    <select id="floor" required>
+        <option value="1">Floor 1</option>
+        <option value="2">Floor 2</option>
+        <option value="3">Floor 3</option>
+        <option value="4">Floor 4</option>
+        <option value="5">Floor 5</option>
+        <option value="6">Floor 6</option>
+    </select>
+    <div class="parking-box" id="parkingBox">
+        <!-- Parking spots will be dynamically generated here -->
+    </div>
+
+    <script>
+        function updateParkingSpots(floor) {
+            const parkingBox = document.getElementById('parkingBox');
+            parkingBox.innerHTML = ''; // Clear previous content
+            
+            fetch(`/parking/spots/${floor}`)
+                .then(response => response.json())
+                .then(data => {
+                    const spotsData = data.spots;
+                    const rowSize = 10; // Number of spots per row
+                    
+                    for (let spotId = 1; spotId <= 20; spotId++) {
+                        const isAvailable = !spotsData[spotId];
+                        
+                        const spotElement = document.createElement('div');
+                        spotElement.textContent = spotId;
+                        spotElement.classList.add('parking-spot');
+                        
+                        if (!isAvailable) {
+                            spotElement.classList.add('unavailable');
+                            spotElement.setAttribute('title', 'Unavailable');
+                        } else {
+                            spotElement.addEventListener('click', () => reserveSpot(floor, spotId));
+                        }
+                        
+                        // Determine which row to append the spot to
+                        const rowIndex = Math.floor((spotId - 1) / rowSize);
+                        const rowElement = parkingBox.querySelector(`.parking-row-${rowIndex}`);
+                        
+                        if (!rowElement) {
+                            // Create a new row if it doesn't exist
+                            const newRow = document.createElement('div');
+                            newRow.classList.add('parking-row', `parking-row-${rowIndex}`);
+                            parkingBox.appendChild(newRow);
+                        }
+                        
+                        // Append the spot to the correct row
+                        const targetRow = parkingBox.querySelector(`.parking-row-${rowIndex}`);
+                        targetRow.appendChild(spotElement);
+                    }
+                })
+                .catch(error => console.error('Error fetching parking spots:', error));
+        }
+
+        function reserveSpot(floor, spotId) {
+            const reservationUrl = `/reservation/`;
+            window.location.href = reservationUrl;
+        }
+
+
+
+        document.getElementById('floor').addEventListener('change', function() {
+            const selectedFloor = this.value;
+            updateParkingSpots(selectedFloor);
+        });
+
+        const defaultFloor = document.getElementById('floor').value;
+        updateParkingSpots(defaultFloor);
+    </script>
 </body>
 </html>

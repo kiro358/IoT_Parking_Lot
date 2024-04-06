@@ -8,17 +8,100 @@
 <body>
     <h2>Reserve Parking</h2>
     <form id="reservationForm">
+        <label for="floor">Select Floor:</label>
+        <select id="floor" required>
+            <option value="1">Floor 1</option>
+            <option value="2">Floor 2</option>
+            <option value="3">Floor 3</option>
+            <option value="4">Floor 4</option>
+            <option value="5">Floor 5</option>
+            <option value="6">Floor 6</option>
+        </select>
+        
         <label for="parkingSpot">Select Parking Spot:</label>
-        <select id="parkingSpot" required></select>
+        <select id="parkingSpot" required>
+            <!-- Options will be populated dynamically using JavaScript -->
+        </select>
         
-        <label for="reservationDate">Date:</label>
-        <input type="date" id="reservationDate" required>
-        
-        <label for="reservationTime">Time Slot:</label>
-        <input type="time" id="reservationTime" required>
+        <label for="duration">Duration (hours):</label>
+        <input type="number" id="duration" min="1" max="24" value="1">
         
         <button type="submit">Reserve</button>
     </form>
-    <script src="reservation.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const parkingSpotSelect = document.getElementById('parkingSpot');
+
+            // Function to populate parking spot options based on the selected floor
+            function populateParkingSpots(floor) {
+                parkingSpotSelect.innerHTML = ''; // Clear existing options
+                
+                // Create options for parking spots (from 1 to 20)
+                for (let spot = 1; spot <= 20; spot++) {
+                    const option = document.createElement('option');
+                    option.value = spot;
+                    option.textContent = `Spot ${spot} (Floor ${floor})`;
+                    parkingSpotSelect.appendChild(option);
+                }
+            }
+
+            // Event listener for floor selection change
+            document.getElementById('floor').addEventListener('change', function(event) {
+                const selectedFloor = event.target.value;
+                populateParkingSpots(selectedFloor); // Populate parking spots for the selected floor
+            });
+
+            // Initial population of parking spots for the default floor (Floor 1)
+            populateParkingSpots(1);
+
+            // Form submission handling
+            document.getElementById('reservationForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const floor = document.getElementById('floor').value;
+                const parkingSpot = document.getElementById('parkingSpot').value;
+                const duration = parseInt(document.getElementById('duration').value);
+                const userId = "user123"; // Replace with actual user ID from session
+
+                // Construct reservation data object
+                const reservationData = {
+                    lot_id: parseInt(floor), // Assuming floor as lot_id
+                    spot_id: parseInt(parkingSpot),
+                    user_id: userId,
+                    current_pricing: 5, // Example pricing (replace with actual logic)
+                    duration: duration, // Duration in hours
+                    reservation_id: '' // Reservation ID can be generated server-side
+                };
+
+                // Submit reservation request to server
+                fetch('http://127.0.0.1:8000/parking/reservations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(reservationData),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Reservation Success:', data);
+                    alert('Reservation successful!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (error.message.includes('400')) {
+                        alert('Reservation failed: Spot is already occupied.');
+                    } else {
+                        alert('Reservation failed: An unexpected error occurred.');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
