@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel
 from typing import List
 from typing import Dict
-
+from fastapi.responses import FileResponse
 
 
 app = FastAPI(title="Parking Lot Management System")
@@ -13,6 +13,15 @@ reservations_data = []
 users_data = []
 current_pricing = {"rate": 5}  # Assuming a simple structure for current pricing
 pricing_history = []  # History of pricing updates
+
+num_floors = 6
+spots_per_floor = 20
+
+# Populate sensors_data with floors (lot_id) and spots (spot_id) initialized to False
+for floor in range(1, num_floors + 1):
+    sensors_data[floor] = {}
+    for spot in range(1, spots_per_floor + 1):
+        sensors_data[floor][spot] = False
 
 # Revised Pydantic models for request and response data
 class LotSensorData(BaseModel):
@@ -32,6 +41,27 @@ class User(BaseModel):
     user_id: str
     username: str
     email: str
+
+@app.get("/")
+def read_root():
+	return FileResponse('public/index.html')
+
+@app.get("/login")
+def read_root():
+	return FileResponse('public/login.html')
+
+@app.get("/register")
+def read_root():
+	return FileResponse('public/register.html')
+
+@app.get("/find_parking")
+def read_root():
+	return FileResponse('public/find_parking.html')
+
+@app.get("/reservation")
+def read_root():
+	return FileResponse('public/reservation.html')
+
 
 # IoT Sensors endpoints
 @app.post("/sensors/data")
@@ -59,6 +89,7 @@ async def create_reservation(reservation: Reservation):
     spot_id = reservation.spot_id
     if lot_id in sensors_data and sensors_data[lot_id].get(spot_id):
         raise HTTPException(status_code=400, detail="Spot is already occupied")
+    sensors_data[lot_id][spot_id] = True
     total_cost = reservation.current_pricing * reservation.duration
     reservation_data = reservation.dict()
     reservation_data["total_cost"] = total_cost
