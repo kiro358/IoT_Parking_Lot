@@ -257,7 +257,8 @@ async def login_user(email: str = Body(...), password: str = Body(...)):
     print("Attempting login with:", email, password)
     print("Available users:", users_data)
     user = next((u for u in users_data if u['email'] == email), None)
-    if user is None or not bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+    hashed_password = user['password'].encode('utf-8')
+    if user is None or not bcrypt.checkpw(password.encode('utf-8'), hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
