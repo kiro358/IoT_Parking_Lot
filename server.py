@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import bcrypt
 from jose import JWTError, jwt
-from datetime import datetime, timedelta
+
 
 # environment variables
 SECRET_KEY = "a_very_secret_key"
