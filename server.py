@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import List, Optional
 from gRPC_client import fetch_dynamic_pricing
-from pricing_service import calculate_dynamic_pricing 
+from pricing_service import calculate_dynamic_pricing, time_based_pricing
 from fastapi.responses import FileResponse
 import time
 from datetime import datetime, timedelta
@@ -191,7 +191,13 @@ async def create_reservation(reservation: Reservation):
     reservations_data.append(reservation_data)
 
     sensors_data[lot_id][spot_id] = True
-    total_cost = reservation.current_pricing * reservation.duration
+    current_time_str = datetime.now().strftime("%H:%M")
+    if time_based_pricing(current_time_str) is None:
+        print(current_time_str)
+        price=5
+    else:
+        price = time_based_pricing(current_time_str) * reservation.current_pricing 
+    total_cost = price * reservation.duration
     
     reservation_data["total_cost"] = total_cost
     reservations_data.append(reservation_data)
