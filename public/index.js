@@ -28,3 +28,7 @@
         window.location.href = '/login';
     });
 
+    findparkingButton.addEventListener('click', function() {
+        window.location.href = '/find_parking';
+    });
+
