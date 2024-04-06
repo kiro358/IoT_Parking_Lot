@@ -1,3 +1,29 @@
+.navbar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    margin: 10px;
+    z-index: 100;
+    display: flex; /* Enables Flexbox for the navbar */
+    align-items: center; /* Centers items vertically in the navbar */
+    gap: 10px; /* Adds some space between each button */
+}
+
+.nav-button {
+    background-color: #0069d9;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.nav-button:hover {
+    background-color: #0056b3;
+}
+
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -61,3 +87,4 @@ form label {
         padding: 15px;
     }
 }
+
