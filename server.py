@@ -54,13 +54,6 @@ def verify_token(token: str, credentials_exception):
 
 app = FastAPI(title="Parking Lot Management System")
 
-# @app.on_event("startup")
-# async def startup_event():
-#     await start_background_tasks()
-
-# async def start_background_tasks():
-#     asyncio.create_task(release_expired_reservations())
-
 # Serve static files from the "public" directory
 app.mount("/public", StaticFiles(directory="public"), name="public")
 
