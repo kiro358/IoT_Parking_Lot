@@ -7,7 +7,7 @@ time_slots = [
     {"start_time": "00:00", "end_time": "06:00", "time_slot": "night"},
     {"start_time": "06:00", "end_time": "12:00", "time_slot": "morning"},
     {"start_time": "12:00", "end_time": "18:00", "time_slot": "afternoon"},
-    {"start_time": "18:00", "end_time": "00:00", "time_slot": "evening"},
+    {"start_time": "18:00", "end_time": "23:59", "time_slot": "evening"},
 ]
 pricing_rates = {
     "night": 0.75,
