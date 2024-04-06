@@ -54,6 +54,10 @@ def verify_token(token: str, credentials_exception):
 
 app = FastAPI(title="Parking Lot Management System")
 
+@app.on_event("startup")
+async def startup_event():
+    await release_expired_reservations()
+
 # Serve static files from the "public" directory
 app.mount("/public", StaticFiles(directory="public"), name="public")
 
@@ -306,6 +310,10 @@ async def release_expired_reservations():
             if current_time >= start_time + duration * 3600:  
                 lot_id = reservation["lot_id"]
                 spot_id = reservation["spot_id"]
+
+                if lot_id not in sensors_data:
+                    sensors_data[lot_id] = {}
+
                 sensors_data[lot_id][spot_id] = False  
 
 
