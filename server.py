@@ -2,7 +2,8 @@ from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel
 from typing import List
 from gRPC_client import fetch_dynamic_pricing
-from pricing_service import calculate_dynamic_pricingfrom fastapi.responses import FileResponse
+from pricing_service import calculate_dynamic_pricing 
+from fastapi.responses import FileResponse
 
 
 app = FastAPI(title="Parking Lot Management System")
