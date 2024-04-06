@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
             console.log('Success:', data);
             // Handle success, for example, redirecting to another page or showing a success message.
+            localStorage.setItem('access_token', data.access_token);
             window.location.href = '/';
         })
         .catch((error) => {

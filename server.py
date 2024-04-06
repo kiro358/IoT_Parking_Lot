@@ -34,9 +34,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.now(datetime.UTC) + expires_delta
+        expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.now(datetime.UTC) + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -127,7 +127,7 @@ class User(BaseModel):
 
 @app.get("/")
 def read_root():
-	return FileResponse('public/index.html')
+	return FileResponse('public/login.html')
 
 @app.get("/login")
 def read_root():
@@ -153,6 +153,12 @@ user1 = User(
     )
 users_data.append(user1.model_dump())
                         
+test_reservations = [
+    {"reservation_id": "res4", "lot_id": "lot4", "spot_id": "spot4", "user_id": "1", "current_pricing": 8, "duration": 4},
+    {"reservation_id": "res5", "lot_id": "lot5", "spot_id": "spot5", "user_id": "1", "current_pricing": 5, "duration": 2},
+    {"reservation_id": "res6", "lot_id": "lot6", "spot_id": "spot6", "user_id": "1", "current_pricing": 9, "duration": 3},
+]
+reservations_data.extend(test_reservations)
 
 # IoT Sensors endpoints
 @app.post("/sensors/data")
@@ -190,6 +196,15 @@ async def create_reservation(reservation: Reservation):
     reservation_data["total_cost"] = total_cost
     reservations_data.append(reservation_data)
     return {"message": "Reservation created successfully", "reservation": reservation, "total_cost": total_cost}
+
+@app.get("/users/{user_id}/reservations")
+async def get_reservations(user_id: str, current_user: str = Depends(get_current_user)):
+    # Assuming `get_current_user` returns the ID of the currently logged-in user
+    # and you're storing reservations in `reservations_data`
+    
+    # For demonstration, we're not checking the user_id against the current_user for authorization
+    user_reservations = [reservation for reservation in reservations_data if reservation["user_id"] == user_id]
+    return user_reservations
 
 # Pricing Endpoints
 @app.get("/dynamic-pricing")
@@ -235,7 +250,7 @@ async def login_user(email: str = Body(...), password: str = Body(...)):
     print("Attempting login with:", email, password)
     print("Available users:", users_data)
     user = next((u for u in users_data if u['email'] == email), None)
-    if user is None or not bcrypt.checkpw(password.encode('utf-8'), user['password']):
+    if user is None or not bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
